@@ -99,6 +99,6 @@ Notes
 
 Here are some interesting points of the project:
 
-- I used the testing framework that is in the Unreal Engine.  See [SqliteTest.cpp](https://github.com/afuzzyllama/DataAccess/blob/master/Source/DataAccess/Private/Tests/SqliteTest.cpp) if you are interested in looking at an example of that
+- I used the testing framework that is in the Unreal Engine.  See [SqliteTest.cpp](https://github.com/afuzzyllama/DataAccess/blob/master/Source/DataAccess/Private/Tests/SqliteTest.cpp) if you are interested in looking at an example of that.  To run the rest in the editor, add a sqlite database at `$(PROJECT DIR)/Data/Test.db` with the `TestObject` table inside of it.
 - TArrays are stored as byte arrays in the database.  In theory this should work with anything you can throw at it, but I haven't tried pushing the limits too hard.
 - This has only been tested with sqlite 3.8.5
