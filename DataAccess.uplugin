@@ -1,0 +1,21 @@
+{
+	"FileVersion" : 3,
+	
+	"FriendlyName" : "Data Access Module",
+	"Version" : 1,
+	"VersionName" : "1.0",
+	"CreatedBy" : "afuzzyllama",
+	"CreatedByURL" : "http://www.pixelsforglory.com",
+	"EngineVersion" : "4.3.0",
+	"Description" : "A generic interface that can support saving to different data sources",
+	"Category" : "Data Access",
+	"EnabledByDefault" : true,
+	
+	"Modules" :
+	[
+		{
+			"Name" : "DataAccess",
+			"Type" : "Runtime"
+		}
+	]
+}
