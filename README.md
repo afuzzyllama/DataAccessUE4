@@ -6,7 +6,7 @@ Data Access Module for the Unreal Engine which saves UObjects
 Overview
 ========
 
-While working with Unreal, I wanted to be able to save UObjects to a local database, sqlite, but I didn't want to have to have to write custom code everytime I created a new object.  Looking at a modern web framework like the Entity Framework, you can apply attributes to a class that will allow the framework to access meta data about your object and save it.  The team at Epic have built in a sweet reflection interface for developers and I decided to see if I could use it in a similar fashion.
+While working with Unreal, I wanted to be able to save UObjects to a local database, sqlite, but I didn't want to have to have to write custom code every time I created a new object.  Looking at a modern web framework like the Entity Framework, you can apply attributes to a class that will allow the framework to access meta data about your object and save it.  The team at Epic have built in a sweet reflection interface for developers and I decided to see if I could use it in a similar fashion.
 
 I have no idea if this should be used in production code, so consider this more of a proof of concept :)
 
@@ -89,7 +89,7 @@ DataResource->Release();
 Installation
 ============
 
-The only implmentation that exists at the moment is for sqlite.  Sqlite can be obtained at the [official website](http://www.sqlite.org/).  After obtaining the source files, place the files (shell.c, sqlite3.h, sqlite3.c, sqlite3ext.h) in the following directory:
+The only implementation that exists at the moment is for sqlite.  Sqlite can be obtained at the [official website](http://www.sqlite.org/).  After obtaining the source files, place the files (shell.c, sqlite3.h, sqlite3.c, sqlite3ext.h) in the following directory:
 ```
 Plugins/DataAccess/Source/DataAccess/ThirdParty/Sqlite/3.8.5/
 ```
