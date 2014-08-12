@@ -45,7 +45,7 @@ namespace UnrealBuildTool.Rules
 				
 			if (!UnrealBuildTool.BuildingRocket())
 			{
-				var SqlitePath = Path.Combine("..", "Plugins", "DataAccess", "Source", "DataAccess", "ThirdParty", "Sqlite", "3.8.5");
+				var SqlitePath = Path.Combine(UnrealBuildTool.GetUProjectPath(), "Plugins", "DataAccess", "Source", "DataAccess", "ThirdParty", "Sqlite", "3.8.5");
 				if (Directory.Exists(SqlitePath))
 				{
 					Definitions.Add("WITH_SQLITE=1");

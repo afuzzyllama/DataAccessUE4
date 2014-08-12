@@ -1,5 +1,7 @@
 // Copyright 2014 afuzzyllama. All Rights Reserved.
 
+#if WITH_SQLITE
+
 #pragma once
 
 #include "IDataResource.h"
@@ -23,3 +25,5 @@ private:
     FString     DatabaseFileLocation;
     sqlite3*    DatabaseResource;
 };
+
+#endif

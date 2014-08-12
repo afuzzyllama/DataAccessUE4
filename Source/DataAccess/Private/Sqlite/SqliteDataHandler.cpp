@@ -1,5 +1,7 @@
 // Copyright 2014 afuzzyllama. All Rights Reserved.
 
+#if WITH_SQLITE
+
 #include "DataAccessPrivatePCH.h"
 #include "SqliteDataResource.h"
 #include "sqlite3.h"
@@ -530,3 +532,5 @@ bool SqliteDataHandler::BindStatementToObject(sqlite3_stmt* const SqliteStatemen
     
     return bSuccess;
 }
+
+#endif

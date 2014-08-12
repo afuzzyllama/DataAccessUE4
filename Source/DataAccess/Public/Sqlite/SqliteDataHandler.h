@@ -1,5 +1,7 @@
 // Copyright 2014 afuzzyllama. All Rights Reserved.
 
+#if WITH_SQLITE
+
 #pragma once
 
 #include "IDataHandler.h"
@@ -48,3 +50,5 @@ private:
      */
     bool BindStatementToObject(sqlite3_stmt* const SqliteStatement, UObject* const Obj);
 };
+
+#endif

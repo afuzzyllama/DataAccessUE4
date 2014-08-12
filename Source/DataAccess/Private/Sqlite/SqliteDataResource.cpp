@@ -1,5 +1,7 @@
 // Copyright 2014 afuzzyllama. All Rights Reserved.
 
+#if WITH_SQLITE
+
 #include "DataAccessPrivatePCH.h"
 #include "sqlite3.h"
 #include "SqliteDataResource.h"
@@ -48,3 +50,5 @@ sqlite3* SqliteDataResource::Get() const
 {
     return DatabaseResource;
 }
+
+#endif
