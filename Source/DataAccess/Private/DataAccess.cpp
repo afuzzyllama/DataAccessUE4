@@ -11,7 +11,7 @@ class FDataAccess : public IDataAccess
 	virtual void ShutdownModule() override;
 };
 
-IMPLEMENT_MODULE( FDataAccess, BlankPlugin )
+IMPLEMENT_MODULE( FDataAccess, DataAccess )
 
 void FDataAccess::StartupModule()
 {
