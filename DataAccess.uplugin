@@ -8,7 +8,7 @@
 	"CreatedByURL" : "http://www.pixelsforglory.com",
 	"EngineVersion" : "4.3.0",
 	"Description" : "A generic interface that can support saving to different data sources",
-	"Category" : "Data Access",
+	"Category" : "Pixels For Glory.Data Access",
 	"EnabledByDefault" : true,
 	
 	"Modules" :
