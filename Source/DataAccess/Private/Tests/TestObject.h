@@ -9,7 +9,7 @@ class UTestObject : public UObject
 {
     GENERATED_UCLASS_BODY()
     
-public:
+private:
     UPROPERTY()
     int32 Id;
     
@@ -27,4 +27,6 @@ public:
     
     UPROPERTY()
     TArray<int32> TestArray;
+    
+    friend class FSqliteDataAccessTest;
 };
