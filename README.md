@@ -70,7 +70,7 @@ UTestObject* TestObj = NewObject<UTestObject>();
 DataHandler->Create(TestObj);
 
 // Read a record
-DatHandler->Read(/**record id*/ 1, TestObj);
+DataHandler->Read(/**record id*/ 1, TestObj);
 
 // Update a record
 TestObj->SomeProperty = "some value";
