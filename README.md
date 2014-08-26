@@ -74,7 +74,7 @@ DataHandler->Source(UTestObject::StaticClass()).Create(TestObj);
 // Read a record
 DatHandler->Source(UTestObject::StaticClass()).Where("Id", EDataHandlerOperator::Equals, FString::FromInt(TestObj->Id)).First(TestObj);
 
-// Read all record
+// Read all records
 TArray<UObject*> Results;
 DatHandler->Source(UTestObject::StaticClass()).Get(Results);
 
