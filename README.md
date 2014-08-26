@@ -8,6 +8,8 @@ Overview
 
 While working with Unreal, I wanted to be able to save UObjects to a local database, sqlite, but I didn't want to have to have to write custom code every time I created a new object.  Looking at a modern web framework like the Entity Framework, you can apply attributes to a class that will allow the framework to access meta data about your object and save it.  The team at Epic have built in a sweet reflection interface for developers and I decided to see if I could use it in a similar fashion.
 
+Later I found that having a way to query my data like with Laravel would also be useful, so I threw some code together that mimics that system loosely.
+
 I have no idea if this should be used in production code, so consider this more of a proof of concept :)
 
 The plugin in its current state can save a UObject to an sqlite database if it meets these requirements:
@@ -67,17 +69,21 @@ TSharedPtr<IDataHandler> DataHandler = MakeShareable(new SqliteDataHandler(DataR
 UTestObject* TestObj = NewObject<UTestObject>();
 
 // Create a record
-DataHandler->Create(TestObj);
+DataHandler->Source(UTestObject::StaticClass()).Create(TestObj);
 
 // Read a record
-DatHandler->Read(/**record id*/ 1, TestObj);
+DatHandler->Source(UTestObject::StaticClass()).Where("Id", EDataHandlerOperator::Equals, FString::FromInt(TestObj->Id)).First(TestObj);
+
+// Read all record
+TArray<UObject*> Results;
+DatHandler->Source(UTestObject::StaticClass()).Get(Results);
 
 // Update a record
 TestObj->SomeProperty = "some value";
-DataHandler->Update(TestObj);
+DataHandler->Source(UTestObject::StaticClass()).Where("Id", EDataHandlerOperator::Equals, FString::FromInt(TestObj->Id)).Update(TestObj);
 
 // Delete a record
-DataHandler->Delete(TestObj);
+DataHandler->Source(UTestObject::StaticClass()).Where("Id", EDataHandlerOperator::Equals, FString::FromInt(TestObj->Id)).Delete(TestObj);
 
 // This shouldn't be necessary since this should be run when the TSharedPtr runs out of references
 DataResource->Release();
@@ -101,4 +107,4 @@ Here are some interesting points of the project:
 
 - I used the testing framework that is in the Unreal Engine.  See [SqliteTest.cpp](https://github.com/afuzzyllama/DataAccess/blob/master/Source/DataAccess/Private/Tests/SqliteTest.cpp) if you are interested in looking at an example of that.  To run the rest in the editor, add a sqlite database at `$(PROJECT DIR)/Data/Test.db` with the `TestObject` table inside of it.
 - TArrays are stored as byte arrays in the database.  In theory this should work with anything you can throw at it, but I haven't tried pushing the limits too hard.
-- This has only been tested with sqlite 3.8.5
+- This has only been slightly tested with sqlite 3.8.5

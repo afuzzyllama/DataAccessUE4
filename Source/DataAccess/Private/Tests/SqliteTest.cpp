@@ -42,7 +42,7 @@ bool FSqliteDataAccessTest::RunTest(const FString& Parameters)
     TestObj->TestString = "Test String";
     TestObj->TestArray.Add(42);
     
-    if(!DataHandler->Create(TestObj))
+    if(!DataHandler->Source(UTestObject::StaticClass()).Create(TestObj))
     {
         AddError(TEXT("Error creating a new record"));
         return false;
@@ -64,7 +64,7 @@ bool FSqliteDataAccessTest::RunTest(const FString& Parameters)
     TestObj2->TestBool = false;
     TestObj2->TestString = "";
     TestObj2->TestArray.Empty();
-    if(!DataHandler->Read(TestObj->Id, TestObj2))
+    if(!DataHandler->Source(UTestObject::StaticClass()).Where("Id", EDataHandlerOperator::Equals, FString::FromInt(TestObj->Id)).First(TestObj2))
     {
         AddError(TEXT("Error reading created record"));
         return false;
@@ -89,7 +89,7 @@ bool FSqliteDataAccessTest::RunTest(const FString& Parameters)
     TestObj->TestBool = false;
     TestObj->TestString = "Another Test String";
     TestObj->TestArray.Add(43);
-    if(!DataHandler->Update(TestObj))
+    if(!DataHandler->Source(UTestObject::StaticClass()).Where("Id", EDataHandlerOperator::Equals, FString::FromInt(TestObj->Id)).Update(TestObj))
     {
         AddError(TEXT("Error updating record"));
         return false;
@@ -101,7 +101,7 @@ bool FSqliteDataAccessTest::RunTest(const FString& Parameters)
     TestObj2->TestBool = false;
     TestObj2->TestString = "";
     TestObj2->TestArray.Empty();
-    if(!DataHandler->Read(TestObj->Id, TestObj2))
+    if(!DataHandler->Source(UTestObject::StaticClass()).Where("Id", EDataHandlerOperator::Equals, FString::FromInt(TestObj->Id)).First(TestObj2))
     {
         AddError(TEXT("Error reading updated record"));
         return false;
@@ -122,8 +122,30 @@ bool FSqliteDataAccessTest::RunTest(const FString& Parameters)
     AddLogItem(TEXT("Successfully updated and read test object"));
     
     
+    AddLogItem(TEXT("Getting all test object"));
+    
+    if(!DataHandler->Source(UTestObject::StaticClass()).Create(TestObj2))
+    {
+        AddError(TEXT("Error creating a second record"));
+        return false;
+    }
+    
+    TArray<UObject*> ReturnedObjects;
+    if(!DataHandler->Source(UTestObject::StaticClass()).Get(ReturnedObjects))
+    {
+        AddError(TEXT("Error fetching all records"));
+        return false;
+    }
+
+    if(ReturnedObjects.Num() != 2)
+    {
+        AddLogItem(TEXT("Error getting all test object"));
+    }
+    AddLogItem(TEXT("Successfully got all test object"));
+    
+    
     AddLogItem(TEXT("Deleting test object"));
-    if(!DataHandler->Delete(TestObj))
+    if(!DataHandler->Source(UTestObject::StaticClass()).Where("Id", EDataHandlerOperator::Equals, FString::FromInt(TestObj->Id)).Delete())
     {
         AddError(TEXT("Error deleting record"));
         return false;
@@ -133,21 +155,28 @@ bool FSqliteDataAccessTest::RunTest(const FString& Parameters)
 
     AddLogItem(TEXT("Testing expected fail cases"));
     TestObj = NewObject<UTestObject>();
-    if(DataHandler->Read(-1, TestObj))
+    if(DataHandler->Source(UTestObject::StaticClass()).Where("Id", EDataHandlerOperator::Equals, "-1").First(TestObj))
     {
         AddError(TEXT("Read success, but object doesn't exist"));
         return false;
     }
     
-    if(DataHandler->Update(TestObj))
+    if(DataHandler->Source(UTestObject::StaticClass()).Where("Id", EDataHandlerOperator::Equals, "-1").Update(TestObj))
     {
         AddError(TEXT("Update success, but object doesn't exist"));
         return false;
     }
     
-    if(DataHandler->Delete(TestObj))
+    if(DataHandler->Source(UTestObject::StaticClass()).Where("Id", EDataHandlerOperator::Equals, "-1").Delete())
     {
         AddError(TEXT("Delete success, but object doesn't exist"));
+        return false;
+    }
+    
+    AddLogItem(TEXT("Deleting all test objects"));
+    if(!DataHandler->Source(UTestObject::StaticClass()).Delete())
+    {
+        AddError(TEXT("Problems cleaning up"));
         return false;
     }
     AddLogItem(TEXT("Successfully tested fail cases"));

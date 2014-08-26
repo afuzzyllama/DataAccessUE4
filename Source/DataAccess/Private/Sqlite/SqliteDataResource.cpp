@@ -26,7 +26,7 @@ bool SqliteDataResource::Acquire()
     
     if(ReturnCode != SQLITE_OK)
     {
-        UE_LOG(LogDataAccess, Error, TEXT("Acquire: Cannot open database at %s with error %s"), *DatabaseFileLocation, UTF8_TO_TCHAR(sqlite3_errmsg(DatabaseResource)));
+        UE_LOG(LogDataAccess, Error, TEXT("Acquire: Cannot open a database connection with %s with error %s"), *DatabaseFileLocation, UTF8_TO_TCHAR(sqlite3_errmsg(DatabaseResource)));
         sqlite3_close(DatabaseResource);
         return false;
     }
@@ -41,7 +41,10 @@ bool SqliteDataResource::Release()
         return true;
     }
     
-    sqlite3_close(DatabaseResource);
+    if(sqlite3_close(DatabaseResource) != SQLITE_OK)
+    {
+        UE_LOG(LogDataAccess, Error, TEXT("Release: Cannot close a database connection with %s with error %s"), *DatabaseFileLocation, UTF8_TO_TCHAR(sqlite3_errmsg(DatabaseResource)));
+    }
     DatabaseResource = nullptr;
     return true;
 }

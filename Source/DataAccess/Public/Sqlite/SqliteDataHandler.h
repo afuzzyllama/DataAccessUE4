@@ -24,13 +24,37 @@ public:
     SqliteDataHandler(TSharedPtr<SqliteDataResource> DataResource);
     virtual ~SqliteDataHandler();
 
-    virtual bool Create(UObject* const Obj);
-    virtual bool Read  (int32 Id, UObject* const Obj);
-    virtual bool Update(UObject* const Obj);
-    virtual bool Delete(UObject* const Obj);
+    // IDataHandler interface
+    virtual IDataHandler& Source(UClass* Source) override;
+
+    virtual IDataHandler& Where(FString FieldName, EDataHandlerOperator Operator, FString Condition) override;
+    virtual IDataHandler& Or() override;
+    virtual IDataHandler& And() override;
+    virtual IDataHandler& BeginNested() override;
+    virtual IDataHandler& EndNested() override;
+
+    virtual bool Create(UObject* const Obj) override;
+    virtual bool Update(UObject* const Obj) override;
+    virtual bool Delete() override;
+    virtual bool First(UObject* const OutObj) override;
+    virtual bool Get(TArray<UObject*>& OutObjs) override;
+    // End of IDataHandler interface
 
 private:
     TSharedPtr<SqliteDataResource> DataResource;
+    
+    bool QueryStarted;
+    UClass* SourceClass;
+    TArray<FString> QueryParts;
+    TArray<TPair<UClass*, FString>> QueryParameters;
+    
+    void ClearQuery();
+    FString GenerateWhereClause();
+
+    /**
+     *
+     */
+    bool BindWhereToStatement(sqlite3_stmt* const SqliteStatement, int32 ParameterIndex = 1);
     
     /**
      * Bind parameters to the passed in sqlite statement
