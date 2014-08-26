@@ -181,6 +181,11 @@ bool FSqliteDataAccessTest::RunTest(const FString& Parameters)
     }
     AddLogItem(TEXT("Successfully tested fail cases"));
     
+    TestObj->ConditionalBeginDestroy();
+    TestObj = nullptr;
+    TestObj2->ConditionalBeginDestroy();
+    TestObj2 = nullptr;
+    
     return true;
 }
 
