@@ -470,7 +470,7 @@ bool SqliteDataHandler::Get(TArray<UObject*>& OutObjs)
         return false;
     }
     OutObjs.Add(CurrentObject);
-    sqlite3_step(SqliteStatement);
+    ResultCode = sqlite3_step(SqliteStatement);
     while(ResultCode != SQLITE_DONE)
     {
         CurrentObject = SourceClass->GetDefaultObject();
