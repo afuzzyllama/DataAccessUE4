@@ -322,7 +322,7 @@ bool SqliteDataHandler::Update(UObject* const Obj)
     }
    
     UIntProperty* LastUpdateTimestampProperty = FindFieldChecked<UIntProperty>(Obj->GetClass(), "LastUpdateTimestamp");
-    LastUpdateTimestampProperty->SetPropertyValue_InContainer(Obj, sqlite3_column_int(SqliteStatement, 1));
+    LastUpdateTimestampProperty->SetPropertyValue_InContainer(Obj, sqlite3_column_int(SqliteStatement, 0));
     
     sqlite3_finalize(SqliteStatement);
     ClearQuery();
@@ -370,6 +370,57 @@ bool SqliteDataHandler::Delete()
         ClearQuery();
         return false;
     }
+    
+    sqlite3_finalize(SqliteStatement);
+    ClearQuery();
+    return true;
+}
+
+bool SqliteDataHandler::Count(int32& OutCount)
+{
+    check(QueryStarted == true);
+
+    OutCount = 0;
+    FString SqlStatement(FString::Printf(TEXT("SELECT COUNT(Id) FROM %s %s;"), *(SourceClass->GetName()), *(GenerateWhereClause())));
+
+    // Preare statement and bind Id to it
+    sqlite3_stmt* SqliteStatement;
+    if(sqlite3_prepare_v2(DataResource->Get(), TCHAR_TO_UTF8(*SqlStatement), FCString::Strlen(*SqlStatement), &SqliteStatement, nullptr) != SQLITE_OK)
+    {
+        UE_LOG(LogDataAccess, Error, TEXT("Count: cannot prepare sqlite statement. Error message \"%s\""), UTF8_TO_TCHAR(sqlite3_errmsg(DataResource->Get())));
+        sqlite3_finalize(SqliteStatement);
+        ClearQuery();
+        return false;
+    }
+    
+    // Bind Where Paramters
+    if(!BindWhereToStatement(SqliteStatement))
+    {
+        UE_LOG(LogDataAccess, Error, TEXT("Count: cannot bind where clause. Error message \"%s\""), UTF8_TO_TCHAR(sqlite3_errmsg(DataResource->Get())));
+        sqlite3_finalize(SqliteStatement);
+        ClearQuery();
+        return false;
+    }
+    
+    // Execute
+    int32 ResultCode = sqlite3_step(SqliteStatement);
+    if(ResultCode == SQLITE_DONE)
+    {
+        UE_LOG(LogDataAccess, Log, TEXT("Count: nothing selected."));
+        sqlite3_finalize(SqliteStatement);
+        ClearQuery();
+        return false;
+    }
+    else if(ResultCode != SQLITE_ROW)
+    {
+        UE_LOG(LogDataAccess, Error, TEXT("Count: error executing select statement."));
+        sqlite3_finalize(SqliteStatement);
+        ClearQuery();
+        return false;
+    }
+
+    // Bind the results to the passed in object
+    OutCount = sqlite3_column_int(SqliteStatement, 0);
     
     sqlite3_finalize(SqliteStatement);
     ClearQuery();
@@ -479,7 +530,8 @@ bool SqliteDataHandler::Get(TArray<UObject*>& OutObjs)
     
     // Execute
     int32 ResultCode = sqlite3_step(SqliteStatement);
-    
+
+    OutObjs.Empty();
     if(ResultCode == SQLITE_DONE)
     {
         UE_LOG(LogDataAccess, Log, TEXT("Get: nothing selected."));
@@ -496,28 +548,18 @@ bool SqliteDataHandler::Get(TArray<UObject*>& OutObjs)
     }
 
     // Bind the results to the passed in object
-    OutObjs.Empty();
-    UObject* CurrentObject = SourceClass->GetDefaultObject();
-    if(!BindStatementToObject(SqliteStatement, CurrentObject))
-    {
-        UE_LOG(LogDataAccess, Error, TEXT("First: error binding results."));
-        sqlite3_finalize(SqliteStatement);
-        ClearQuery();
-        return false;
-    }
-    OutObjs.Add(CurrentObject);
-    ResultCode = sqlite3_step(SqliteStatement);
     while(ResultCode != SQLITE_DONE)
     {
-        CurrentObject = SourceClass->GetDefaultObject();
-        if(!BindStatementToObject(SqliteStatement, CurrentObject))
+        
+        int32 Index = OutObjs.Add(SourceClass->GetDefaultObject());
+        UObject* CurrentObject = OutObjs[Index];
+        if(!BindStatementToObject(SqliteStatement, OutObjs[Index]))
         {
-            UE_LOG(LogDataAccess, Error, TEXT("First: error binding results."));
+            UE_LOG(LogDataAccess, Error, TEXT("Get: error binding results."));
             sqlite3_finalize(SqliteStatement);
             ClearQuery();
             return false;
         }
-        OutObjs.Add(CurrentObject);
         ResultCode = sqlite3_step(SqliteStatement);
     }
     

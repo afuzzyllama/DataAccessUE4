@@ -36,6 +36,7 @@ public:
     virtual bool Create(UObject* const Obj) override;
     virtual bool Update(UObject* const Obj) override;
     virtual bool Delete() override;
+    virtual bool Count(int32& OutCount) override;
     virtual bool First(UObject* const OutObj) override;
     virtual bool Get(TArray<UObject*>& OutObjs) override;
     // End of IDataHandler interface

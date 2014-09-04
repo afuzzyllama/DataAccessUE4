@@ -142,6 +142,21 @@ bool FSqliteDataAccessTest::RunTest(const FString& Parameters)
         AddLogItem(TEXT("Error getting all test object"));
     }
     AddLogItem(TEXT("Successfully got all test object"));
+
+    AddLogItem(TEXT("Getting count"));
+    
+    int32 Count;
+    if(!DataHandler->Source(UTestObject::StaticClass()).Count(Count))
+    {
+        AddError(TEXT("Error getting count"));
+        return false;
+    }
+
+    if(Count != 2)
+    {
+        AddLogItem(TEXT("Count incorrect"));
+    }
+    AddLogItem(TEXT("Successfully got count"));
     
     
     AddLogItem(TEXT("Deleting test object"));

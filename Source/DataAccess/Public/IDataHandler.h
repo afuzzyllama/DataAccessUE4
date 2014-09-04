@@ -31,6 +31,7 @@ public:
     virtual bool Create(UObject* const Obj) = 0;
     virtual bool Update(UObject* const Obj) = 0;
     virtual bool Delete() = 0;
+    virtual bool Count(int32& OutCount) = 0;
     virtual bool First(UObject* const OutObj) = 0;
     virtual bool Get(TArray<UObject*>& OutObjs) = 0;
     
