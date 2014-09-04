@@ -121,28 +121,14 @@ bool FSqliteDataAccessTest::RunTest(const FString& Parameters)
     AddLogItem(TEXT("Updated test object matched return test object"));
     AddLogItem(TEXT("Successfully updated and read test object"));
     
-    
-    AddLogItem(TEXT("Getting all test object"));
-    
+    // Adding second record
     if(!DataHandler->Source(UTestObject::StaticClass()).Create(TestObj2))
     {
         AddError(TEXT("Error creating a second record"));
         return false;
     }
     
-    TArray<UObject*> ReturnedObjects;
-    if(!DataHandler->Source(UTestObject::StaticClass()).Get(ReturnedObjects))
-    {
-        AddError(TEXT("Error fetching all records"));
-        return false;
-    }
-
-    if(ReturnedObjects.Num() != 2)
-    {
-        AddLogItem(TEXT("Error getting all test object"));
-    }
-    AddLogItem(TEXT("Successfully got all test object"));
-
+    
     AddLogItem(TEXT("Getting count"));
     
     int32 Count;
@@ -154,10 +140,29 @@ bool FSqliteDataAccessTest::RunTest(const FString& Parameters)
 
     if(Count != 2)
     {
-        AddLogItem(TEXT("Count incorrect"));
+        AddError(TEXT("Count incorrect"));
     }
     AddLogItem(TEXT("Successfully got count"));
     
+    
+    AddLogItem(TEXT("Getting all test object"));
+    TArray<UObject*> ReturnedObjects;
+    for(int32 i = 0; i < Count; ++i)
+    {
+        ReturnedObjects.Add(NewObject<UTestObject>());
+    }
+    if(!DataHandler->Source(UTestObject::StaticClass()).Get(ReturnedObjects))
+    {
+        AddError(TEXT("Error fetching all records"));
+        return false;
+    }
+
+    if(ReturnedObjects.Num() != 2)
+    {
+        AddError(TEXT("Error getting all test object"));
+    }
+    AddLogItem(TEXT("Successfully got all test object"));
+
     
     AddLogItem(TEXT("Deleting test object"));
     if(!DataHandler->Source(UTestObject::StaticClass()).Where("Id", EDataHandlerOperator::Equals, FString::FromInt(TestObj->Id)).Delete())

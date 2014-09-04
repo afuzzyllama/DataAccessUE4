@@ -74,8 +74,14 @@ DataHandler->Source(UTestObject::StaticClass()).Create(TestObj);
 // Read a record
 DatHandler->Source(UTestObject::StaticClass()).Where("Id", EDataHandlerOperator::Equals, FString::FromInt(TestObj->Id)).First(TestObj);
 
-// Read all records
+// Read all records.  Not the most ideal setup, but the array should match the amount of records returned.  
 TArray<UObject*> Results;
+int32 Count;
+DatHandler->Source(UTestObject::StaticClass()).Count(Count);
+for(int32 i = 0; i < Count; ++i)
+{
+	Results.Add(NewObject<UTestObject>());
+}
 DatHandler->Source(UTestObject::StaticClass()).Get(Results);
 
 // Update a record

@@ -497,6 +497,14 @@ bool SqliteDataHandler::First(UObject* const OutObj)
 bool SqliteDataHandler::Get(TArray<UObject*>& OutObjs)
 {
     check(QueryStarted == true);
+
+    if(OutObjs.Num() <= 0)
+    {
+        UE_LOG(LogDataAccess, Error, TEXT("Get: cannot get with an empty array"));
+        OutObjs.Empty();
+        ClearQuery();
+        return false;
+    }
     
     // Build columns for select statement
     FString Columns;
@@ -515,6 +523,7 @@ bool SqliteDataHandler::Get(TArray<UObject*>& OutObjs)
     {
         UE_LOG(LogDataAccess, Error, TEXT("Get: cannot prepare sqlite statement. Error message \"%s\""), UTF8_TO_TCHAR(sqlite3_errmsg(DataResource->Get())));
         sqlite3_finalize(SqliteStatement);
+        OutObjs.Empty();
         ClearQuery();
         return false;
     }
@@ -524,18 +533,18 @@ bool SqliteDataHandler::Get(TArray<UObject*>& OutObjs)
     {
         UE_LOG(LogDataAccess, Error, TEXT("Get: cannot bind where clause. Error message \"%s\""), UTF8_TO_TCHAR(sqlite3_errmsg(DataResource->Get())));
         sqlite3_finalize(SqliteStatement);
+        OutObjs.Empty();
         ClearQuery();
         return false;
     }
     
     // Execute
     int32 ResultCode = sqlite3_step(SqliteStatement);
-
-    OutObjs.Empty();
     if(ResultCode == SQLITE_DONE)
     {
         UE_LOG(LogDataAccess, Log, TEXT("Get: nothing selected."));
         sqlite3_finalize(SqliteStatement);
+        OutObjs.Empty();
         ClearQuery();
         return false;
     }
@@ -543,24 +552,31 @@ bool SqliteDataHandler::Get(TArray<UObject*>& OutObjs)
     {
         UE_LOG(LogDataAccess, Error, TEXT("Get: error executing select statement."));
         sqlite3_finalize(SqliteStatement);
+        OutObjs.Empty();
         ClearQuery();
         return false;
     }
 
+    int32 CurrentIndex = 0;
     // Bind the results to the passed in object
     while(ResultCode != SQLITE_DONE)
     {
-        
-        int32 Index = OutObjs.Add(SourceClass->GetDefaultObject());
-        UObject* CurrentObject = OutObjs[Index];
-        if(!BindStatementToObject(SqliteStatement, OutObjs[Index]))
+        if(CurrentIndex == OutObjs.Num())
+        {
+            UE_LOG(LogDataAccess, Warning, TEXT("Get: Passed array not large enough to handle all objects.  %i objected returned"), CurrentIndex);
+            break;
+        }
+    
+        if(!BindStatementToObject(SqliteStatement, OutObjs[CurrentIndex]))
         {
             UE_LOG(LogDataAccess, Error, TEXT("Get: error binding results."));
             sqlite3_finalize(SqliteStatement);
             ClearQuery();
+            OutObjs.Empty();
             return false;
         }
         ResultCode = sqlite3_step(SqliteStatement);
+        ++CurrentIndex;
     }
     
     sqlite3_finalize(SqliteStatement);
