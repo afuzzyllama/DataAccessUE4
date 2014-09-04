@@ -15,7 +15,7 @@ I have no idea if this should be used in production code, so consider this more 
 The plugin in its current state can save a UObject to an sqlite database if it meets these requirements:
 
  1.  It uses basic data types or a TArray.
- 2.  It contains a member `int32 Id`
+ 2.  It contains a members `int32 Id`, `int32 CreateTimestamp`, and `int32 LastUpdateTimestamp`
  3.  The sqlite database used contains a table that matches the class name of the object
 
 Here is an example class:
@@ -43,10 +43,16 @@ public:
     
     UPROPERTY()
     TArray<int32> TestArray;
+    
+    UPROPERTY()
+    int32 CreateTimestamp;
+    
+    UPROPERTY()
+    int32 LastUpdateTimestamp;
 };
 ```
 
-That class would have the following table created in sqlite:
+That class would have the following table and triggers created in sqlite:
 ```
 CREATE TABLE TestObject ( 
   Id INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -54,8 +60,27 @@ CREATE TABLE TestObject (
   TestFloat REAL, 
   TestBool NUMERIC, 
   TestString TEXT, 
-  TestArray BLOB 
+  TestArray BLOB,
+  CreateTimestamp INTEGER, 
+  LastUpdateTimestamp INTEGER
 );
+
+CREATE TRIGGER TestObject_Insert 
+AFTER INSERT ON TestObject 
+BEGIN 
+ UPDATE TestObject 
+ SET CreateTimestamp = strftime('%s','now'), 
+     LastUpdateTimestamp = strftime('%s','now') 
+ WHERE Id = new.Id; 
+END;
+
+CREATE TRIGGER TestObject_Update 
+AFTER UPDATE ON TestObject FOR EACH ROW 
+BEGIN 
+ UPDATE TestObject 
+ SET LastUpdateTimestamp = strftime('%s','now') 
+ WHERE Id = new.Id; 
+END;
 ```
 Usage
 =====
