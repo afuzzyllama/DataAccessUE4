@@ -140,7 +140,7 @@ bool SqliteDataHandler::Create(UObject* const Obj)
     {
         UProperty* Property = *Itr;
         
-        if(Property->GetName() == "Id")
+        if(Property->GetName() == "Id" || Property->GetName() == "CreateTimestamp" || Property->GetName() == "LastUpdateTimestamp" )
         {
             continue;
         }
@@ -184,18 +184,21 @@ bool SqliteDataHandler::Create(UObject* const Obj)
     sqlite3_finalize(SqliteStatement);
     
 
-    // Get last auto increment id and update the UObject
-    SqlStatement = "SELECT seq FROM sqlite_sequence WHERE name = ?";
+    // Get last id, create, and update timestamps and update the UObject
+    int32 LastId = sqlite3_last_insert_rowid(DataResource->Get());
+    UIntProperty* IdProperty = FindFieldChecked<UIntProperty>(Obj->GetClass(), "Id");
+    IdProperty->SetPropertyValue_InContainer(Obj, LastId);
     
+    SqlStatement = FString::Printf(TEXT("SELECT CreateTimestamp, LastUpdateTimestamp FROM %s WHERE Id = ?;"), *(Obj->GetClass()->GetName()));
     if(sqlite3_prepare_v2(DataResource->Get(), TCHAR_TO_UTF8(*(SqlStatement)), FCString::Strlen(*SqlStatement), &SqliteStatement, nullptr) != SQLITE_OK)
     {
-        UE_LOG(LogDataAccess, Error, TEXT("Create: cannot prepare sqlite statement for seq. Error message \"%s\""), UTF8_TO_TCHAR(sqlite3_errmsg(DataResource->Get())));
+        UE_LOG(LogDataAccess, Error, TEXT("Create: cannot prepare sqlite statement for timestamps. Error message \"%s\""), UTF8_TO_TCHAR(sqlite3_errmsg(DataResource->Get())));
         sqlite3_finalize(SqliteStatement);
         ClearQuery();
         return false;
     }
     
-    if(sqlite3_bind_text(SqliteStatement, 1, TCHAR_TO_UTF8(*(Obj->GetClass()->GetName())), FCString::Strlen(*(Obj->GetClass()->GetName())), SQLITE_TRANSIENT) )
+    if(sqlite3_bind_int(SqliteStatement, 1, LastId))
     {
         UE_LOG(LogDataAccess, Error, TEXT("Create: cannot bind class name to sqlite statement for seq. Error message \"%s\""), UTF8_TO_TCHAR(sqlite3_errmsg(DataResource->Get())));
         sqlite3_finalize(SqliteStatement);
@@ -211,8 +214,11 @@ bool SqliteDataHandler::Create(UObject* const Obj)
         return false;
     }
    
-    UIntProperty* IdProperty = FindFieldChecked<UIntProperty>(Obj->GetClass(), "Id");
-    IdProperty->SetPropertyValue_InContainer(Obj, sqlite3_column_int(SqliteStatement, 0));
+    UIntProperty* CreateTimestampProperty = FindFieldChecked<UIntProperty>(Obj->GetClass(), "CreateTimestamp");
+    CreateTimestampProperty->SetPropertyValue_InContainer(Obj, sqlite3_column_int(SqliteStatement, 0));
+
+    UIntProperty* LastUpdateTimestampProperty = FindFieldChecked<UIntProperty>(Obj->GetClass(), "LastUpdateTimestamp");
+    LastUpdateTimestampProperty->SetPropertyValue_InContainer(Obj, sqlite3_column_int(SqliteStatement, 1));
 
     sqlite3_finalize(SqliteStatement);
     ClearQuery();
@@ -232,7 +238,7 @@ bool SqliteDataHandler::Update(UObject* const Obj)
     for(TFieldIterator<UProperty> Itr(Obj->GetClass()); Itr; ++Itr)
     {
         UProperty* Property = *Itr;
-        if(Property->GetName() == "Id")
+        if(Property->GetName() == "Id" || Property->GetName() == "CreateTimestamp" || Property->GetName() == "LastUpdateTimestamp" )
         {
             continue;
         }
@@ -287,6 +293,36 @@ bool SqliteDataHandler::Update(UObject* const Obj)
         ClearQuery();
         return false;
     }
+    sqlite3_finalize(SqliteStatement);
+    
+    // Get create and update timestamps and update the UObject
+    SqlStatement = FString::Printf(TEXT("SELECT DISTINCT LastUpdateTimestamp FROM %s %s;"), *(Obj->GetClass()->GetName()), *(GenerateWhereClause()));
+    if(sqlite3_prepare_v2(DataResource->Get(), TCHAR_TO_UTF8(*(SqlStatement)), FCString::Strlen(*SqlStatement), &SqliteStatement, nullptr) != SQLITE_OK)
+    {
+        UE_LOG(LogDataAccess, Error, TEXT("Create: cannot prepare sqlite statement for timestamp. Error message \"%s\""), UTF8_TO_TCHAR(sqlite3_errmsg(DataResource->Get())));
+        sqlite3_finalize(SqliteStatement);
+        ClearQuery();
+        return false;
+    }
+    
+    if(!BindWhereToStatement(SqliteStatement, 1))
+    {
+        UE_LOG(LogDataAccess, Error, TEXT("Create: cannot bind where clause for timestamp. Error message \"%s\""), UTF8_TO_TCHAR(sqlite3_errmsg(DataResource->Get())));
+        sqlite3_finalize(SqliteStatement);
+        ClearQuery();
+        return false;
+    }
+    
+    if(sqlite3_step(SqliteStatement) != SQLITE_ROW)
+    {
+        UE_LOG(LogDataAccess, Error, TEXT("Create: cannot step sqlite statement for seq. Error message \"%s\""), UTF8_TO_TCHAR(sqlite3_errmsg(DataResource->Get())));
+        sqlite3_finalize(SqliteStatement);
+        ClearQuery();
+        return false;
+    }
+   
+    UIntProperty* LastUpdateTimestampProperty = FindFieldChecked<UIntProperty>(Obj->GetClass(), "LastUpdateTimestamp");
+    LastUpdateTimestampProperty->SetPropertyValue_InContainer(Obj, sqlite3_column_int(SqliteStatement, 1));
     
     sqlite3_finalize(SqliteStatement);
     ClearQuery();
@@ -634,7 +670,7 @@ bool SqliteDataHandler::BindObjectToStatement(UObject* const Obj, sqlite3_stmt* 
     for(TFieldIterator<UProperty> Itr(Obj->GetClass()); Itr; ++Itr)
     {
         UProperty* Property = *Itr;
-        if(Property->GetName() == "Id")
+        if(Property->GetName() == "Id" || Property->GetName() == "CreateTimestamp" || Property->GetName() == "LastUpdateTimestamp" )
         {
             continue;
         }
