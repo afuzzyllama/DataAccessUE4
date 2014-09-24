@@ -128,7 +128,7 @@ Installation
 
 The only implementation that exists at the moment is for sqlite.  Sqlite can be obtained at the [official website](http://www.sqlite.org/).  After obtaining the source files, place the files (shell.c, sqlite3.h, sqlite3.c, sqlite3ext.h) in the following directory:
 ```
-Plugins/DataAccess/Source/DataAccess/ThirdParty/Sqlite/3.8.5/
+Plugins/DataAccess/Source/DataAccess/ThirdParty/Sqlite/3.8.6/
 ```
 
 Notes
@@ -138,4 +138,4 @@ Here are some interesting points of the project:
 
 - I used the testing framework that is in the Unreal Engine.  See [SqliteTest.cpp](https://github.com/afuzzyllama/DataAccess/blob/master/Source/DataAccess/Private/Tests/SqliteTest.cpp) if you are interested in looking at an example of that.  To run the rest in the editor, add a sqlite database at `$(PROJECT DIR)/Data/Test.db` with the `TestObject` table inside of it.
 - TArrays are stored as byte arrays in the database.  In theory this should work with anything you can throw at it, but I haven't tried pushing the limits too hard.
-- This has only been slightly tested with sqlite 3.8.5
+- This has only been slightly tested with sqlite 3.8.6
