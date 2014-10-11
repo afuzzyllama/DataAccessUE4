@@ -7,8 +7,8 @@ DEFINE_LOG_CATEGORY(LogDataAccess);
 class FDataAccess : public IDataAccess
 {
 	/** IModuleInterface implementation */
-	virtual void StartupModule() override;
-	virtual void ShutdownModule() override;
+	virtual void StartupModule() OVERRIDE;
+	virtual void ShutdownModule() OVERRIDE;
 };
 
 IMPLEMENT_MODULE( FDataAccess, DataAccess )

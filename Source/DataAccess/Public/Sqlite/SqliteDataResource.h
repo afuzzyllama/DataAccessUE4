@@ -6,7 +6,7 @@
 
 #include "IDataResource.h"
 
-class sqlite3;
+typedef struct sqlite3 sqlite3;
 
 /**
  * Implementation of IDataResource for Sqlite
@@ -17,8 +17,8 @@ public:
     SqliteDataResource(FString DatabaseFileLocation);
     virtual ~SqliteDataResource();
     
-    virtual bool Acquire() override;
-    virtual bool Release() override;
+    virtual bool Acquire() OVERRIDE;
+    virtual bool Release() OVERRIDE;
     virtual sqlite3* Get() const;
     
 private:

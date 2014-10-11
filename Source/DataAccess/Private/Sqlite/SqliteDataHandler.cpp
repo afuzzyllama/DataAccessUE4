@@ -43,7 +43,7 @@ IDataHandler& SqliteDataHandler::Where(FString FieldName, EDataHandlerOperator O
     check(QueryStarted == true);
     bool bFound = false;
     
-    UClass* FieldType;
+    UClass* FieldType = nullptr;
     // Terrible search, could be implemented better
     for(TFieldIterator<UProperty> Itr(SourceClass); Itr; ++Itr)
     {
@@ -60,6 +60,7 @@ IDataHandler& SqliteDataHandler::Where(FString FieldName, EDataHandlerOperator O
     if(!bFound)
     {
         UE_LOG(LogDataAccess, Error, TEXT("Where: FieldName \"%s\" does not exist in UClass \"%s\".  Clause not added"), *(FieldName), *(SourceClass->GetName()));
+        return *this;
     }
 
     QueryParts.Add(FieldName);

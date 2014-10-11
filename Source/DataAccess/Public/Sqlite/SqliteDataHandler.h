@@ -8,7 +8,7 @@
 
 // forward declaration
 class SqliteDataResource;
-class sqlite3_stmt;
+typedef struct sqlite3_stmt sqlite3_stmt;
 
 /**
  * Implementation of the IDataHandler for Sqlite
@@ -25,20 +25,20 @@ public:
     virtual ~SqliteDataHandler();
 
     // IDataHandler interface
-    virtual IDataHandler& Source(UClass* Source) override;
+    virtual IDataHandler& Source(UClass* Source) OVERRIDE;
 
-    virtual IDataHandler& Where(FString FieldName, EDataHandlerOperator Operator, FString Condition) override;
-    virtual IDataHandler& Or() override;
-    virtual IDataHandler& And() override;
-    virtual IDataHandler& BeginNested() override;
-    virtual IDataHandler& EndNested() override;
+    virtual IDataHandler& Where(FString FieldName, EDataHandlerOperator Operator, FString Condition) OVERRIDE;
+    virtual IDataHandler& Or() OVERRIDE;
+    virtual IDataHandler& And() OVERRIDE;
+    virtual IDataHandler& BeginNested() OVERRIDE;
+    virtual IDataHandler& EndNested() OVERRIDE;
 
-    virtual bool Create(UObject* const Obj) override;
-    virtual bool Update(UObject* const Obj) override;
-    virtual bool Delete() override;
-    virtual bool Count(int32& OutCount) override;
-    virtual bool First(UObject* const OutObj) override;
-    virtual bool Get(TArray<UObject*>& OutObjs) override;
+    virtual bool Create(UObject* const Obj) OVERRIDE;
+    virtual bool Update(UObject* const Obj) OVERRIDE;
+    virtual bool Delete() OVERRIDE;
+    virtual bool Count(int32& OutCount) OVERRIDE;
+    virtual bool First(UObject* const OutObj) OVERRIDE;
+    virtual bool Get(TArray<UObject*>& OutObjs) OVERRIDE;
     // End of IDataHandler interface
 
 private:
