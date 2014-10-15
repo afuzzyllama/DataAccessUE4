@@ -3,7 +3,6 @@
 #if WITH_SQLITE
 
 #include "DataAccessPrivatePCH.h"
-#include "sqlite3.h"
 #include "SqliteDataResource.h"
 
 SqliteDataResource::SqliteDataResource(FString DatabaseFileLocation)

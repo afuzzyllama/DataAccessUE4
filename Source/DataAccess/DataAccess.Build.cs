@@ -20,14 +20,15 @@ namespace UnrealBuildTool.Rules
 				}
 			);
 
-				
 			if (!UnrealBuildTool.BuildingRocket())
 			{
-				var SqlitePath = Path.Combine(UnrealBuildTool.GetUProjectPath(), "Plugins", "DataAccess", "Source", "DataAccess", "ThirdParty", "Sqlite", "3.8.6");
-				if (Directory.Exists(SqlitePath))
+				var SqlitePath = Path.Combine("..", "Plugins", "DataAccess", "Source", "DataAccess", "ThirdParty", "Sqlite", "3.8.6");
+                if (Directory.Exists(SqlitePath))
 				{
 					Definitions.Add("WITH_SQLITE=1");
-					PrivateIncludePaths.Add(Path.Combine("DataAccess", "ThirdParty", "Sqlite", "3.8.6"));
+
+                    var IncludePath = Path.GetFullPath(SqlitePath);
+					PrivateIncludePaths.Add(IncludePath);
 				}
 			}
 		}

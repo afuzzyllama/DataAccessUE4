@@ -4,7 +4,6 @@
 
 #include "DataAccessPrivatePCH.h"
 #include "SqliteDataResource.h"
-#include "sqlite3.h"
 #include "SqliteDataHandler.h"
 
 SqliteDataHandler::SqliteDataHandler(TSharedPtr<SqliteDataResource> DataResource)
