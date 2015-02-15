@@ -1,7 +1,4 @@
 // Copyright 2014 afuzzyllama. All Rights Reserved.
-
-#if WITH_SQLITE
-
 #pragma once
 
 #include "IDataHandler.h"
@@ -25,20 +22,20 @@ public:
     virtual ~SqliteDataHandler();
 
     // IDataHandler interface
-    virtual IDataHandler& Source(UClass* Source) OVERRIDE;
+    virtual IDataHandler& Source(UClass* Source);
 
-    virtual IDataHandler& Where(FString FieldName, EDataHandlerOperator Operator, FString Condition) OVERRIDE;
-    virtual IDataHandler& Or() OVERRIDE;
-    virtual IDataHandler& And() OVERRIDE;
-    virtual IDataHandler& BeginNested() OVERRIDE;
-    virtual IDataHandler& EndNested() OVERRIDE;
+    virtual IDataHandler& Where(FString FieldName, EDataHandlerOperator Operator, FString Condition);
+    virtual IDataHandler& Or();
+    virtual IDataHandler& And();
+    virtual IDataHandler& BeginNested();
+    virtual IDataHandler& EndNested();
 
-    virtual bool Create(UObject* const Obj) OVERRIDE;
-    virtual bool Update(UObject* const Obj) OVERRIDE;
-    virtual bool Delete() OVERRIDE;
-    virtual bool Count(int32& OutCount) OVERRIDE;
-    virtual bool First(UObject* const OutObj) OVERRIDE;
-    virtual bool Get(TArray<UObject*>& OutObjs) OVERRIDE;
+    virtual bool Create(UObject* const Obj);
+    virtual bool Update(UObject* const Obj);
+    virtual bool Delete();
+    virtual bool Count(int32& OutCount);
+    virtual bool First(UObject* const OutObj);
+    virtual bool Get(TArray<UObject*>& OutObjs);
     // End of IDataHandler interface
 
 private:
@@ -75,5 +72,3 @@ private:
      */
     bool BindStatementToObject(sqlite3_stmt* const SqliteStatement, UObject* const Obj);
 };
-
-#endif

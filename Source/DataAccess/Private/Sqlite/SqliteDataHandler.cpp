@@ -1,7 +1,4 @@
 // Copyright 2014 afuzzyllama. All Rights Reserved.
-
-#if WITH_SQLITE
-
 #include "DataAccessPrivatePCH.h"
 #include "SqliteDataResource.h"
 #include "SqliteDataHandler.h"
@@ -939,7 +936,7 @@ bool SqliteDataHandler::BindStatementToObject(sqlite3_stmt* const SqliteStatemen
         else if(Property->IsA(UBoolProperty::StaticClass()))
         {
             UBoolProperty* BoolProperty = CastChecked<UBoolProperty>(Property);
-            BoolProperty->SetPropertyValue_InContainer(Obj, sqlite3_column_int(SqliteStatement, ColumnIndex));
+            BoolProperty->SetPropertyValue_InContainer(Obj, (sqlite3_column_int(SqliteStatement, ColumnIndex) == 0 ? false : true));
         }
         else if(Property->IsA(UStrProperty::StaticClass()))
         {
@@ -979,5 +976,3 @@ bool SqliteDataHandler::BindStatementToObject(sqlite3_stmt* const SqliteStatemen
     
     return bSuccess;
 }
-
-#endif

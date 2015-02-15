@@ -1,7 +1,4 @@
 // Copyright 2014 afuzzyllama. All Rights Reserved.
-
-#if WITH_SQLITE
-
 #include "DataAccessPrivatePCH.h"
 #include "AutomationTest.h"
 #include "SqliteDataResource.h"
@@ -208,5 +205,3 @@ bool FSqliteDataAccessTest::RunTest(const FString& Parameters)
     
     return true;
 }
-
-#endif

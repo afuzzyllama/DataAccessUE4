@@ -126,10 +126,7 @@ DataResource->Release();
 Installation
 ============
 
-The only implementation that exists at the moment is for sqlite.  Sqlite can be obtained at the [official website](http://www.sqlite.org/).  After obtaining the source files, place the files (shell.c, sqlite3.h, sqlite3.c, sqlite3ext.h) in the following directory:
-```
-Plugins/DataAccess/Source/DataAccess/ThirdParty/Sqlite/3.8.6/
-```
+Epic has included a way to add SQLiteSupport in the engine. Look in `Engine/Source/ThirdParty/sqlite` for more information on how to include support.  This plugin will not compile without it!
 
 Notes
 =====
