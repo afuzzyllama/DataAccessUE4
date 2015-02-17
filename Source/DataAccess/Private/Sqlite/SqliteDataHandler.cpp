@@ -721,7 +721,8 @@ bool SqliteDataHandler::BindObjectToStatement(UObject* const Obj, sqlite3_stmt* 
     int32 ParameterIndex = 1;
     bool bSuccess = true;
     
-    // Iterate through all of the UObject properties and bind values to the passed in prepared statement
+    // Iterate through all of the UObject properties and bind values to the passed in prepared statement.
+	// Since the query is built off the same query of the object.  The ordering should be the same.
     for(TFieldIterator<UProperty> Itr(Obj->GetClass()); Itr; ++Itr)
     {
         UProperty* Property = *Itr;
@@ -879,6 +880,7 @@ bool SqliteDataHandler::BindStatementToObject(sqlite3_stmt* const SqliteStatemen
     bool bSuccess = true;
     
     // Iterator through all of the UObject properties and the passed in prepared statement to it
+	// Since the query is built off the same query of the object.  The ordering should be the same.
     for(TFieldIterator<UProperty> Itr(Obj->GetClass()); Itr; ++Itr)
     {
         UProperty* Property = *Itr;
