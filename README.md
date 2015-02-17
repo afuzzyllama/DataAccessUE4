@@ -1,7 +1,7 @@
 DataAccess
 ==========
 
-Data Access Module for the Unreal Engine which saves UObjects 
+Data Access Module for the Unreal Engine which saves UObjects.  Intended to be used with SQLite, but could be modified to support a variety of other databases if the interfaces are implemented correctly. 
 
 Overview
 ========
