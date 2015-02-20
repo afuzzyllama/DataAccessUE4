@@ -6,7 +6,7 @@
 	"VersionName" : "1.0",
 	"CreatedBy" : "afuzzyllama",
 	"CreatedByURL" : "http://www.pixelsforglory.com",
-	"EngineVersion" : "4.3.0",
+	"EngineVersion" : "4.6.1",
 	"Description" : "A generic interface that can support saving to different data sources",
 	"Category" : "Pixels For Glory.Data Access",
 	"EnabledByDefault" : true,
