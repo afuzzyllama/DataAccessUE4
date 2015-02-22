@@ -3,7 +3,7 @@
 #include "DataAccessPrivatePCH.h"
 #include "TestObject.h"
 
-UTestObject::UTestObject(const class FObjectInitializer& ObjectInitializer)
+UTestObject::UTestObject(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
     Id = -1;

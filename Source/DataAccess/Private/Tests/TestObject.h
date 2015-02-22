@@ -12,31 +12,37 @@ CREATE TRIGGER TestObject_Update AFTER UPDATE ON TestObject FOR EACH ROW BEGIN U
 UCLASS()
 class UTestObject : public UObject
 {
-    GENERATED_UCLASS_BODY()
+    GENERATED_BODY()
     
 private:
-    UPROPERTY()
+
+	UTestObject(const FObjectInitializer& ObjectInitializer);
+
+	UPROPERTY(meta = (SaveToDatabase = "true"))
     int32 Id;
     
-    UPROPERTY()
+    UPROPERTY(meta = (SaveToDatabase="true"))
     int32 TestInt;
     
-    UPROPERTY()
+	UPROPERTY(meta = (SaveToDatabase = "true"))
     float TestFloat;
     
-    UPROPERTY()
+	UPROPERTY(meta = (SaveToDatabase = "true"))
     bool TestBool;
     
-    UPROPERTY()
+	UPROPERTY(meta = (SaveToDatabase = "true"))
     FString TestString;
     
-    UPROPERTY()
+	UPROPERTY(meta = (SaveToDatabase = "true"))
     TArray<int32> TestArray;
     
-    UPROPERTY()
+	UPROPERTY()
+	FString TestIgnore;
+
+	UPROPERTY(meta = (SaveToDatabase = "true"))
     int32 CreateTimestamp;
     
-    UPROPERTY()
+	UPROPERTY(meta = (SaveToDatabase = "true"))
     int32 LastUpdateTimestamp;
     
     friend class FSqliteDataAccessTest;

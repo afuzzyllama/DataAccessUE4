@@ -15,9 +15,12 @@ I have no idea if this should be used in production code, so consider this more 
 The plugin in its current state can save a UObject to an sqlite database if it meets these requirements:
 
  1.  It uses basic data types or a TArray.
- 2.  It contains a members `int32 Id`, `int32 CreateTimestamp`, and `int32 LastUpdateTimestamp`
- 3.  The sqlite database used contains a table that matches the class name of the object
+ 2.  It contains a property `int32 Id`, `int32 CreateTimestamp`, and `int32 LastUpdateTimestamp`
+ 3.  All property that are desired to be saved to the database, including property that are required, contain the meta data of SaveToDatabase = "true".  
+ 4.  The sqlite database used contains a table that matches the class name of the object
 
+The meta data requirement will allow UObjects that are inherited from core UObjects to save specific marked property instead of trying to save all properties returned by the reflection system.
+ 
 Here is an example class:
 ```
 UCLASS()
@@ -26,28 +29,31 @@ class UTestObject : public UObject
     GENERATED_UCLASS_BODY()
     
 public:
-    UPROPERTY()
+    UPROPERTY(meta = (SaveToDatabase = "true"))
     int32 Id;
     
-    UPROPERTY()
+    UPROPERTY(meta = (SaveToDatabase = "true"))
     int32 TestInt;
     
-    UPROPERTY()
+    UPROPERTY(meta = (SaveToDatabase = "true"))
     float TestFloat;
     
-    UPROPERTY()
+    UPROPERTY(meta = (SaveToDatabase = "true"))
     bool TestBool;
     
-    UPROPERTY()
+    UPROPERTY(meta = (SaveToDatabase = "true"))
     FString TestString;
     
-    UPROPERTY()
+    UPROPERTY(meta = (SaveToDatabase = "true"))
     TArray<int32> TestArray;
     
-    UPROPERTY()
+	UPROPERTY()
+	FString TestIgnore;	
+	
+    UPROPERTY(meta = (SaveToDatabase = "true"))
     int32 CreateTimestamp;
     
-    UPROPERTY()
+    UPROPERTY(meta = (SaveToDatabase = "true"))
     int32 LastUpdateTimestamp;
 };
 ```

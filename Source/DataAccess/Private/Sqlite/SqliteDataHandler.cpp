@@ -137,11 +137,11 @@ bool SqliteDataHandler::Create(UObject* const Obj)
     {
         UProperty* Property = *Itr;
         
-        if(Property->GetName() == "Id" || Property->GetName() == "CreateTimestamp" || Property->GetName() == "LastUpdateTimestamp" )
+		if (Property->GetName() == "Id" || Property->GetName() == "CreateTimestamp" || Property->GetName() == "LastUpdateTimestamp" || !Property->HasMetaData("SaveToDatabase") || !Property->GetMetaData("SaveToDatabase").ToUpper().Equals("TRUE"))
         {
             continue;
         }
-        
+		
         Columns += FString::Printf(TEXT("%s,"), *(Property->GetName()));
         Values += "?,";
     }
@@ -235,11 +235,11 @@ bool SqliteDataHandler::Update(UObject* const Obj)
     for(TFieldIterator<UProperty> Itr(Obj->GetClass()); Itr; ++Itr)
     {
         UProperty* Property = *Itr;
-        if(Property->GetName() == "Id" || Property->GetName() == "CreateTimestamp" || Property->GetName() == "LastUpdateTimestamp" )
+		if (Property->GetName() == "Id" || Property->GetName() == "CreateTimestamp" || Property->GetName() == "LastUpdateTimestamp" || !Property->HasMetaData("SaveToDatabase") || !Property->GetMetaData("SaveToDatabase").ToUpper().Equals("TRUE"))
         {
             continue;
         }
-        
+
         ++PropertyCount;
         Sets += FString::Printf(TEXT("%s = ?,"), *(Property->GetName()));
     }
@@ -434,6 +434,12 @@ bool SqliteDataHandler::First(UObject* const OutObj)
     for(TFieldIterator<UProperty> Itr(SourceClass); Itr; ++Itr)
     {
         UProperty* Property = *Itr;
+
+		if (!Property->HasMetaData("SaveToDatabase") || !Property->GetMetaData("SaveToDatabase").ToUpper().Equals("TRUE"))
+		{
+			continue;
+		}
+		
         Columns += FString::Printf(TEXT("%s,"), *(Property->GetName()));
     }
     Columns.RemoveFromEnd(",", ESearchCase::IgnoreCase);
@@ -508,6 +514,13 @@ bool SqliteDataHandler::Get(TArray<UObject*>& OutObjs)
     for(TFieldIterator<UProperty> Itr(SourceClass); Itr; ++Itr)
     {
         UProperty* Property = *Itr;
+		
+		// All properties to save to the database require the SaveToDatabase attribute
+		if (!Property->HasMetaData("SaveToDatabase") || !Property->GetMetaData("SaveToDatabase").ToUpper().Equals("TRUE"))
+		{
+			continue;
+		}
+
         Columns += FString::Printf(TEXT("%s,"), *(Property->GetName()));
     }
     Columns.RemoveFromEnd(",", ESearchCase::IgnoreCase);
@@ -726,7 +739,7 @@ bool SqliteDataHandler::BindObjectToStatement(UObject* const Obj, sqlite3_stmt* 
     for(TFieldIterator<UProperty> Itr(Obj->GetClass()); Itr; ++Itr)
     {
         UProperty* Property = *Itr;
-        if(Property->GetName() == "Id" || Property->GetName() == "CreateTimestamp" || Property->GetName() == "LastUpdateTimestamp" )
+		if (Property->GetName() == "Id" || Property->GetName() == "CreateTimestamp" || Property->GetName() == "LastUpdateTimestamp" || !Property->HasMetaData("SaveToDatabase") || !Property->GetMetaData("SaveToDatabase").ToUpper().Equals("TRUE"))
         {
             continue;
         }
@@ -883,7 +896,13 @@ bool SqliteDataHandler::BindStatementToObject(sqlite3_stmt* const SqliteStatemen
 	// Since the query is built off the same query of the object.  The ordering should be the same.
     for(TFieldIterator<UProperty> Itr(Obj->GetClass()); Itr; ++Itr)
     {
-        UProperty* Property = *Itr;
+		UProperty* Property = *Itr;
+
+		// All properties to save to the database require the SaveToDatabase attribute
+		if (!Property->HasMetaData("SaveToDatabase") || !Property->GetMetaData("SaveToDatabase").ToUpper().Equals("TRUE"))
+		{
+			continue;
+		}
 
         if(Property->IsA(UByteProperty::StaticClass()))
         {
