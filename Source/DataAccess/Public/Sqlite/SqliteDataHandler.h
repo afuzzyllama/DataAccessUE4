@@ -10,7 +10,7 @@ typedef struct sqlite3_stmt sqlite3_stmt;
 /**
  * Implementation of the IDataHandler for Sqlite
  */
-class SqliteDataHandler : public IDataHandler
+class DATAACCESS_API SqliteDataHandler : public IDataHandler
 {
 public:
     /**
@@ -36,6 +36,8 @@ public:
     virtual bool Count(int32& OutCount);
     virtual bool First(UObject* const OutObj);
     virtual bool Get(TArray<UObject*>& OutObjs);
+
+	virtual bool ExecuteQuery(FString Query, TArray< TSharedPtr<FJsonValue> >& JsonArray);
     // End of IDataHandler interface
 
 private:
@@ -71,4 +73,6 @@ private:
      * @return                      true if successful, false otherwise
      */
     bool BindStatementToObject(sqlite3_stmt* const SqliteStatement, UObject* const Obj);
+
+	bool BindStatementToArray(sqlite3_stmt* const SqliteStatement, TSharedPtr<FJsonValue>& FJsonValue);
 };

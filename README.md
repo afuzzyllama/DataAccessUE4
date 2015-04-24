@@ -122,6 +122,10 @@ DataHandler->Source(UTestObject::StaticClass()).Where("Id", EDataHandlerOperator
 // Delete a record
 DataHandler->Source(UTestObject::StaticClass()).Where("Id", EDataHandlerOperator::Equals, FString::FromInt(TestObj->Id)).Delete(TestObj);
 
+// Manually run a query that returns Unreal's JSON object implementation
+TArray< TSharedPtr<FJsonValue> > JsonArray;
+DataHandler->ExecuteQuery("SELECT Id FROM TestObject", JsonArray);
+
 // This shouldn't be necessary since this should be run when the TSharedPtr runs out of references
 DataResource->Release();
 

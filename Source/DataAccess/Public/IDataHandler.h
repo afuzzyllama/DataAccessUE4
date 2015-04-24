@@ -15,7 +15,7 @@ enum EDataHandlerOperator
 /**
  * Interface that facilities saving data.  Will utilizie Unreal's reflection to save data
  */
-class IDataHandler
+class DATAACCESS_API IDataHandler
 {
 public:
     virtual ~IDataHandler(){}
@@ -34,5 +34,7 @@ public:
     virtual bool Count(int32& OutCount) = 0;
     virtual bool First(UObject* const OutObj) = 0;
     virtual bool Get(TArray<UObject*>& OutObjs) = 0;
+
+	virtual bool ExecuteQuery(FString Query, TArray< TSharedPtr<FJsonValue> >& JsonArray) = 0;
     
 };

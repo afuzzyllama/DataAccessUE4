@@ -403,10 +403,7 @@ bool SqliteDataHandler::Count(int32& OutCount)
     int32 ResultCode = sqlite3_step(SqliteStatement);
     if(ResultCode == SQLITE_DONE)
     {
-        UE_LOG(LogDataAccess, Log, TEXT("Count: nothing selected."));
-        sqlite3_finalize(SqliteStatement);
-        ClearQuery();
-        return false;
+		OutCount = 0;
     }
     else if(ResultCode != SQLITE_ROW)
     {
@@ -415,10 +412,12 @@ bool SqliteDataHandler::Count(int32& OutCount)
         ClearQuery();
         return false;
     }
-
-    // Bind the results to the passed in object
-    OutCount = sqlite3_column_int(SqliteStatement, 0);
-    
+	else
+	{
+		// Bind the results to the passed in object
+		OutCount = sqlite3_column_int(SqliteStatement, 0);
+	}
+	
     sqlite3_finalize(SqliteStatement);
     ClearQuery();
     return true;
@@ -470,7 +469,7 @@ bool SqliteDataHandler::First(UObject* const OutObj)
     
     if(ResultCode == SQLITE_DONE)
     {
-        UE_LOG(LogDataAccess, Log, TEXT("First: nothing selected."));
+        //UE_LOG(LogDataAccess, Log, TEXT("First: nothing selected."));
         sqlite3_finalize(SqliteStatement);
         ClearQuery();
         return false;
@@ -552,7 +551,7 @@ bool SqliteDataHandler::Get(TArray<UObject*>& OutObjs)
     int32 ResultCode = sqlite3_step(SqliteStatement);
     if(ResultCode == SQLITE_DONE)
     {
-        UE_LOG(LogDataAccess, Log, TEXT("Get: nothing selected."));
+        //UE_LOG(LogDataAccess, Log, TEXT("Get: nothing selected."));
         sqlite3_finalize(SqliteStatement);
         OutObjs.Empty();
         ClearQuery();
@@ -592,6 +591,73 @@ bool SqliteDataHandler::Get(TArray<UObject*>& OutObjs)
     sqlite3_finalize(SqliteStatement);
     ClearQuery();
     return true;
+}
+
+bool SqliteDataHandler::ExecuteQuery(FString Query, TArray< TSharedPtr<FJsonValue> >& JsonArray)
+{
+	// A query cannot be started before a manual query execution 
+	check(QueryStarted == false);
+	
+	JsonArray.Empty();
+
+	// Preare statement and bind Id to it
+	sqlite3_stmt* SqliteStatement;
+	if (sqlite3_prepare_v2(DataResource->Get(), TCHAR_TO_UTF8(*Query), FCString::Strlen(*Query), &SqliteStatement, nullptr) != SQLITE_OK)
+	{
+		UE_LOG(LogDataAccess, Error, TEXT("Get: cannot prepare sqlite statement. Error message \"%s\""), UTF8_TO_TCHAR(sqlite3_errmsg(DataResource->Get())));
+		sqlite3_finalize(SqliteStatement);
+		ClearQuery();
+		return false;
+	}
+
+	// Bind Where Paramters
+	if (!BindWhereToStatement(SqliteStatement))
+	{
+		UE_LOG(LogDataAccess, Error, TEXT("Get: cannot bind where clause. Error message \"%s\""), UTF8_TO_TCHAR(sqlite3_errmsg(DataResource->Get())));
+		sqlite3_finalize(SqliteStatement);
+		ClearQuery();
+		return false;
+	}
+
+	// Execute
+	int32 ResultCode = sqlite3_step(SqliteStatement);
+	if (ResultCode == SQLITE_DONE)
+	{
+		//UE_LOG(LogDataAccess, Log, TEXT("Get: nothing selected."));
+		sqlite3_finalize(SqliteStatement);
+		ClearQuery();
+		return false;
+	}
+	else if (ResultCode != SQLITE_ROW)
+	{
+		UE_LOG(LogDataAccess, Error, TEXT("Get: error executing select statement."));
+		sqlite3_finalize(SqliteStatement);
+		ClearQuery();
+		return false;
+	}
+
+	int32 CurrentIndex = 0;
+	// Bind the results to the passed in object
+	while (ResultCode != SQLITE_DONE)
+	{
+		TSharedPtr< FJsonValue > JsonValue;
+		if (!BindStatementToArray(SqliteStatement, JsonValue))
+		{
+			UE_LOG(LogDataAccess, Error, TEXT("Get: error binding results."));
+			sqlite3_finalize(SqliteStatement);
+			JsonArray.Empty();
+			ClearQuery();
+			return false;
+		}
+		JsonArray.Add(JsonValue);
+
+		ResultCode = sqlite3_step(SqliteStatement);
+		++CurrentIndex;
+	}
+
+	sqlite3_finalize(SqliteStatement);
+	ClearQuery();
+	return true;
 }
 
 void SqliteDataHandler::ClearQuery()
@@ -996,4 +1062,61 @@ bool SqliteDataHandler::BindStatementToObject(sqlite3_stmt* const SqliteStatemen
     }
     
     return bSuccess;
+}
+
+bool SqliteDataHandler::BindStatementToArray(sqlite3_stmt* const SqliteStatement, TSharedPtr< FJsonValue >& JsonValue)
+{
+	check(SqliteStatement)
+
+	int32 ColumnCount = sqlite3_column_count(SqliteStatement);
+
+	TSharedPtr< FJsonObject > JsonObject(new FJsonObject());
+	for (int32 i = 0; i < ColumnCount; ++i)
+	{
+		int32 ColumnTypeCode = sqlite3_column_type(SqliteStatement, i);
+
+		FString ColumnName = UTF8_TO_TCHAR(sqlite3_column_name(SqliteStatement, i));
+				
+		// Fundamental Datatypes
+		// ---------------------
+		// SQLITE_INTEGER  1 - 64 - bit signed integer
+		// SQLITE_FLOAT    2 - 64 - bit IEEE floating point number
+		// SQLITE3_TEXT    3 - string
+		// SQLITE_BLOB     4 - BLOB
+		// SQLITE_NULL     5 - NULL
+		
+		FString ColumnValue;
+		TSharedPtr< FJsonValue > FieldJsonValue;
+		if (ColumnTypeCode == SQLITE_INTEGER)
+		{
+			FieldJsonValue = MakeShareable(new FJsonValueString(FString::FromInt(sqlite3_column_int(SqliteStatement, i))));
+			JsonObject->SetField(ColumnName, FieldJsonValue);
+		}
+		else if (ColumnTypeCode == SQLITE_FLOAT)
+		{
+			FieldJsonValue = MakeShareable(new FJsonValueNumber(sqlite3_column_double(SqliteStatement, i)));
+			JsonObject->SetField(ColumnName, FieldJsonValue);
+		}
+		else if (ColumnTypeCode == SQLITE3_TEXT)
+		{
+			FieldJsonValue = MakeShareable(new FJsonValueString(UTF8_TO_TCHAR(sqlite3_column_text(SqliteStatement, i))));
+			JsonObject->SetField(ColumnName, FieldJsonValue);
+		}
+		else if (ColumnTypeCode == SQLITE_BLOB)
+		{
+			UE_LOG(LogDataAccess, Error, TEXT("BindStatementToArray: Column '%s' is BLOB and not supported yet"), *ColumnName);
+		}
+		else if (ColumnTypeCode == SQLITE_NULL)
+		{
+			FieldJsonValue = MakeShareable(new FJsonValueNull());
+			JsonObject->SetField(ColumnName, FieldJsonValue);
+		}
+		else
+		{
+			UE_LOG(LogDataAccess, Error, TEXT("BindStatementToArray: Column '%s' could not be bound"), *ColumnName);
+		}	
+	}
+	JsonValue = MakeShareable(new FJsonValueObject(JsonObject));
+
+	return true;
 }

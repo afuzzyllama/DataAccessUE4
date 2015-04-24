@@ -8,7 +8,7 @@ typedef struct sqlite3 sqlite3;
 /**
  * Implementation of IDataResource for Sqlite
  */
-class SqliteDataResource : public IDataResource<sqlite3>
+class DATAACCESS_API SqliteDataResource : public IDataResource<sqlite3>
 {
 public:
     SqliteDataResource(FString DatabaseFileLocation);

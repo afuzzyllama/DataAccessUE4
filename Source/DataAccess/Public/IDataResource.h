@@ -6,7 +6,7 @@
  * Interface that facilities create a data resource.
  */
 template<class T>
-class IDataResource
+class DATAACCESS_API IDataResource
 {
 public:
     virtual ~IDataResource(){}

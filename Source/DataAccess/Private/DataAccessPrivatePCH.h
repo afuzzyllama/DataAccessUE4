@@ -3,6 +3,7 @@
 
 #include "IDataAccess.h"
 #include "CoreUObject.h"
+#include "Json.h"
 
 #include "sqlite3.h"
 

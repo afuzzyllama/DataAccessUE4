@@ -91,8 +91,8 @@ bool FSqliteDataAccessTest::RunTest(const FString& Parameters)
         AddError(TEXT("Error updating record"));
         return false;
     }
-    
-    TestObj2 = NewObject<UTestObject>();
+        
+	TestObj2 = NewObject<UTestObject>();
     TestObj2->TestInt = 0;
     TestObj2->TestFloat = 0.f;
     TestObj2->TestBool = false;
@@ -117,17 +117,47 @@ bool FSqliteDataAccessTest::RunTest(const FString& Parameters)
     }
     AddLogItem(TEXT("Updated test object matched return test object"));
     AddLogItem(TEXT("Successfully updated and read test object"));
-    
-    // Adding second record
-    if(!DataHandler->Source(UTestObject::StaticClass()).Create(TestObj2))
+
+	
+	AddLogItem(TEXT("Testing manual query"));
+	TArray< TSharedPtr<FJsonValue> > JsonArray;
+	if (!DataHandler->ExecuteQuery(FString::Printf(TEXT("SELECT Id, TestInt, TestFloat, TestBool, TestString FROM TestObject WHERE Id = %s"), *(FString::FromInt(TestObj->Id))), JsonArray))
+	{
+		AddError(TEXT("Error executing manual query"));
+		return false;
+	}
+
+	if (JsonArray.Num() != 1)
+	{
+		AddError(TEXT("Manual query did not return expected 1 result"));
+		return false;
+	}
+
+	int32 JsonTestInt = static_cast<int32>(JsonArray[0]->AsObject()->GetNumberField("TestInt"));
+	float JsonTestFloat = static_cast<float>(JsonArray[0]->AsObject()->GetNumberField("TestFloat"));
+	bool JsonTestBool = JsonArray[0]->AsObject()->GetBoolField("TestBool");
+	FString JsonTestString = JsonArray[0]->AsObject()->GetStringField("TestString");
+
+	if (!(TestObj->TestInt == JsonTestInt		&&
+		TestObj->TestFloat == JsonTestFloat	&&
+		TestObj->TestBool == JsonTestBool		&&
+		TestObj->TestString == JsonTestString))
+	{
+		AddError(TEXT("Json values do not match TestObj values"));
+		return false;
+	}
+	AddLogItem(TEXT("Successfully executing manual query"));
+
+	
+	AddLogItem(TEXT("Creating second test object"));
+	if(!DataHandler->Source(UTestObject::StaticClass()).Create(TestObj2))
     {
         AddError(TEXT("Error creating a second record"));
         return false;
     }
-    
-    
-    AddLogItem(TEXT("Getting count"));
-    
+        
+
+	AddLogItem(TEXT("Getting count"));
     int32 Count;
     if(!DataHandler->Source(UTestObject::StaticClass()).Count(Count))
     {
