@@ -35,6 +35,6 @@ public:
     virtual bool First(UObject* const OutObj) = 0;
     virtual bool Get(TArray<UObject*>& OutObjs) = 0;
 
-	virtual bool ExecuteQuery(FString Query, TArray< TSharedPtr<FJsonValue> >& JsonArray) = 0;
+	virtual bool ExecuteQuery(FString Query, TArray< TSharedPtr<class FJsonValue> >& JsonArray) = 0;
     
 };

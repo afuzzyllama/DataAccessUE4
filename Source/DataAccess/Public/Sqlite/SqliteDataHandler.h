@@ -37,7 +37,7 @@ public:
     virtual bool First(UObject* const OutObj);
     virtual bool Get(TArray<UObject*>& OutObjs);
 
-	virtual bool ExecuteQuery(FString Query, TArray< TSharedPtr<FJsonValue> >& JsonArray);
+	virtual bool ExecuteQuery(FString Query, TArray< TSharedPtr<class FJsonValue> >& JsonArray);
     // End of IDataHandler interface
 
 private:
@@ -66,7 +66,7 @@ private:
     bool BindObjectToStatement(UObject* const Obj, sqlite3_stmt* const SqliteStatement);
     
     /**
-     * Bind results to UObject
+     * Bind result to UObject
      *
      * @param SqliteStatement       statement to bind from
      * @param Obj                   object to bind to
@@ -74,5 +74,12 @@ private:
      */
     bool BindStatementToObject(sqlite3_stmt* const SqliteStatement, UObject* const Obj);
 
-	bool BindStatementToArray(sqlite3_stmt* const SqliteStatement, TSharedPtr<FJsonValue>& FJsonValue);
+	/**
+	* Bind result to JsonValue
+	*
+	* @param SqliteStatement       statement to bind from
+	* @param JsonValue             JsonValue to bind to
+	* @return                      true if successful, false otherwise
+	*/
+	bool BindStatementToArray(sqlite3_stmt* const SqliteStatement, TSharedPtr<class FJsonValue>& JsonValue);
 };
